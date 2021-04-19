@@ -106,14 +106,14 @@ client.connect(err => {
     })
 
 
-    //Get user roll through email query(/getMyOrders?email=<email>)
-    app.get('/getAdminRoll', (req, res) => {
+    //Get user role through email query(/getMyOrders?email=<email>)
+    app.get('/getAdminRole', (req, res) => {
         const email = req.query.email;
         adminCollection.find({ email: email })
             .toArray((err, documents) => {
                 let admin;
                 documents[0]?.email ? admin=true : admin=false
-                res.send(admin)
+                res.send({admin})
             })
     })
 
