@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 require("dotenv").config();
 const cors = require('cors')
+const ObjectID = require('mongodb').ObjectID;
 const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cxq2v.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -40,7 +41,7 @@ client.connect(err => {
     //Get only one service detail
     app.get('/getServices/:id', (req, res) => {
         const id = req.params.id;
-        serviceCollection.find({ serviceId: id })
+        serviceCollection.find({ _id: ObjectID(id) })
             .toArray((err, documents) => {
                 res.send(documents[0])
             })
@@ -57,16 +58,22 @@ client.connect(err => {
 
     //Get all order for admin through email query(/getAllOrders?email=<email>)
     app.get('/getAllOrders', (req, res) => {
-        const email = req.query.email;
-        if (email === adminCollection.email) {
-            orderCollection.find({})
-                .toArray((err, documents) => {
-                    res.send(documents)
-                })
-        }
-        else {
-            res.status(401).send("You are unauthorize/you don't have permission")
-        }
+        orderCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+
+
+    //Update order status
+    app.patch('/updateStatus/:id', (req, res) => {
+        const id = req.params.id;
+        const status = req.body.status;
+        orderCollection.updateOne({ _id: ObjectID(id) }, { $set:{status: status}})
+        .then(result => { 
+            res.send(result.modifiedCount > 0);
+        })
+            
     })
 
 
@@ -112,8 +119,8 @@ client.connect(err => {
         adminCollection.find({ email: email })
             .toArray((err, documents) => {
                 let admin;
-                documents[0]?.email ? admin=true : admin=false
-                res.send({admin})
+                documents[0]?.email ? admin = true : admin = false
+                res.send({ admin })
             })
     })
 
