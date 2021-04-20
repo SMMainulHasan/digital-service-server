@@ -47,6 +47,16 @@ client.connect(err => {
             })
     })
 
+
+    //Delete service
+    app.delete('/deleteService/:id', (req, res) => {
+        const id = req.params.id;
+        serviceCollection.deleteOne({ _id: ObjectID(id) })
+            .then(result => {
+                res.send(result.deletedCount > 0);
+            })
+    })
+
     //=======================Orders related api======================//
     //Add user order
     app.post('/addOrder', (req, res) => {
